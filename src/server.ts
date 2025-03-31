@@ -122,6 +122,18 @@ wss.on('connection', function connection(ws:WebSocket){
                 // Remove the WebSocket client from the room
                 rooms[roomId].delete(ws);
 
+                // Send the message to each client that user is disconnected
+                rooms[roomId].forEach((client) => {
+                    if(client.readyState === WebSocket.OPEN){
+                        const data = {
+                            type: 'connected-users-count',
+                            count: rooms[roomId].size
+                        }
+
+                        client.send(JSON.stringify(data));
+                    }
+                })
+
                 // If the room is now empty, delete the room
                 if(rooms[roomId].size === 0){
                     delete rooms[roomId];
