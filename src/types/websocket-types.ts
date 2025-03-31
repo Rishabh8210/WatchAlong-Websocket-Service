@@ -23,4 +23,9 @@ export interface RoomMessages {
     type:'new-message'
 }
 
-export type WebSocketMessage = JoinRoomMessage | MessageToRoom | RoomMessages | null
+export interface ConnectedUsers {
+    type: 'connected-users-count', 
+    roomId: string
+}
+
+export type WebSocketMessage = JoinRoomMessage | MessageToRoom | RoomMessages | ConnectedUsers | null

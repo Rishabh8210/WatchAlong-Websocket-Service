@@ -41,8 +41,8 @@ wss.on('connection', function connection(ws:WebSocket){
     })
 
     // Handle incomming messages from WebSocket clients
+    let receivedData:WebSocketMessage = null; 
     ws.on('message', function message(data: Data, isBinary: boolean){
-        let receivedData:WebSocketMessage = null; 
 
         // Parse the received message (can be either string or binary)
         if(typeof data === "string"){
@@ -65,6 +65,12 @@ wss.on('connection', function connection(ws:WebSocket){
             if(type === "room-joining"){
                 rooms[roomId].add(ws); // Add the WebSocket client to the room
                 console.log(`Client joined to room: ${roomId}`);
+
+                const data = {
+                    type: 'connection-established',
+                    userId: connectionId,
+                }
+                ws.send(JSON.stringify(data))
             }
 
             // Handle "sending-message-to-room" message type
@@ -89,14 +95,22 @@ wss.on('connection', function connection(ws:WebSocket){
                     }
                 })
             }
+            if(type === 'connected-users-count'){
+                const { roomId } = receivedData;
+                rooms[roomId].forEach((client) => {
+                    if(client.readyState === WebSocket.OPEN){
+                        const data = {
+                            type: 'connected-users-count',
+                            count: rooms[roomId].size
+                        }
+
+                        client.send(JSON.stringify(data), {binary: isBinary});
+                    }
+                })
+            }
         }
     })
-
-    const data = {
-        type: 'connection-established',
-        userId: connectionId
-    }
-    ws.send(JSON.stringify(data))
+    
 
     // Handle client disconnects
     ws.on('close', function close(){
