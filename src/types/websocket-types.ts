@@ -18,5 +18,9 @@ export interface MessageToRoom {
 export interface RoomClient {
     [key: string]: Set<WebSocket>
 }
+export interface RoomMessages {
+    roomId: string,
+    type:'new-message'
+}
 
-export type WebSocketMessage = JoinRoomMessage | MessageToRoom | null
+export type WebSocketMessage = JoinRoomMessage | MessageToRoom | RoomMessages | null

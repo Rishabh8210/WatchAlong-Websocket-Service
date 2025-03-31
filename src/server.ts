@@ -55,7 +55,7 @@ wss.on('connection', function connection(ws:WebSocket){
         // If the received data is valid
         if(receivedData){
             const { roomId, type } = receivedData;
-            
+            console.log(receivedData);
             // If the room doesn't exist, create it
             if(!rooms[roomId]){
                 rooms[roomId] = new Set(); // Initialize the room with an empty Set to track clients
@@ -79,8 +79,24 @@ wss.on('connection', function connection(ws:WebSocket){
                     }
                 })
             }
+
+            if(type === 'new-message'){
+                rooms[roomId].forEach((client) => {
+                    if(client.readyState === WebSocket.OPEN){
+                        
+                        // Send the message to each client (binary or text based on the message type)
+                        client.send(data, {binary: isBinary});
+                    }
+                })
+            }
         }
     })
+
+    const data = {
+        type: 'connection-established',
+        userId: connectionId
+    }
+    ws.send(JSON.stringify(data))
 
     // Handle client disconnects
     ws.on('close', function close(){
