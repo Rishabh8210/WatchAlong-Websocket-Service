@@ -1,0 +1,30 @@
+{
+  "name": "watchalong-websocket-service",
+  "version": "1.0.0",
+  "description": "This websocket service is for watch along platform to make realtime communication",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "tsc -b && node dist/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rishabh8210/WatchAlong-Websocket-Service.git"
+  },
+  "author": "Rishabh",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Rishabh8210/WatchAlong-Websocket-Service/issues"
+  },
+  "homepage": "https://github.com/Rishabh8210/WatchAlong-Websocket-Service#readme",
+  "devDependencies": {
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@types/express": "^5.0.1",
+    "@types/ws": "^8.18.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "ws": "^8.18.1"
+  }
+}
