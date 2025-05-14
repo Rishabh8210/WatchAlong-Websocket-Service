@@ -15,9 +15,16 @@ export interface MessageToRoom {
     message: MessageData
 }
 
+
+// export interface RoomClient {
+//     [key: string]: Set<WebSocket>
+// }
+
 export interface RoomClient {
-    [key: string]: Set<WebSocket>
+    clients: Set<WebSocket>;
+    currenltyStreaming?: string;
 }
+
 export interface RoomMessages {
     roomId: string,
     type:'new-message'

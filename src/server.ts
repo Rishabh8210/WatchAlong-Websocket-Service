@@ -23,7 +23,8 @@ const httpServer = app.listen(PORT, () => {
 })
 
 
-const rooms: RoomClient = {}
+const rooms: {[roomId: string]: RoomClient} = {}
+// const rooms: RoomClient = {}
 
 // Initilize a WebSocket server using the HTTP server
 const wss = new WebSocketServer({server: httpServer});
@@ -58,26 +59,33 @@ wss.on('connection', function connection(ws:WebSocket){
             console.log(receivedData);
             // If the room doesn't exist, create it
             if(!rooms[roomId]){
-                rooms[roomId] = new Set(); // Initialize the room with an empty Set to track clients
+                rooms[roomId] = {
+                    clients: new Set() // Initialize the room with an empty Set to track clients
+                } 
             }
+            // if(!rooms[roomId]){
+            //     rooms[roomId] = new Set() // Initialize the room with an empty Set to track clients
+            // }
 
             // Handle "room-joining" message type
             if(type === "room-joining"){
-                rooms[roomId].add(ws); // Add the WebSocket client to the room
+                rooms[roomId].clients.add(ws); // Add the WebSocket client to the room
                 console.log(`Client joined to room: ${roomId}`);
 
                 const data = {
                     type: 'connection-established',
                     userId: connectionId,
+                    currentlyPlaying: rooms[roomId].currenltyStreaming
                 }
                 ws.send(JSON.stringify(data))
             }
 
             // Handle "sending-message-to-room" message type
             if(type === 'sending-message-to-room'){
-
+                console.log(data);
+                rooms[roomId].currenltyStreaming = receivedData.message.data;
                 // Broadcast the message to all connected clients in the room
-                rooms[roomId].forEach((client) => {
+                rooms[roomId].clients.forEach((client) => {
                     if(client.readyState === WebSocket.OPEN){
                         
                         // Send the message to each client (binary or text based on the message type)
@@ -88,7 +96,7 @@ wss.on('connection', function connection(ws:WebSocket){
 
             if(type === 'player-controler'){
                 // Broadcast the message to all connected clients in the room
-                rooms[roomId].forEach((client) => {
+                rooms[roomId].clients.forEach((client) => {
                     if(client.readyState === WebSocket.OPEN){
                         
                         // Send the message to each client (binary or text based on the message type)
@@ -98,7 +106,7 @@ wss.on('connection', function connection(ws:WebSocket){
             }
 
             if(type === 'new-message'){
-                rooms[roomId].forEach((client) => {
+                rooms[roomId].clients.forEach((client) => {
                     if(client.readyState === WebSocket.OPEN){
                         
                         // Send the message to each client (binary or text based on the message type)
@@ -108,11 +116,11 @@ wss.on('connection', function connection(ws:WebSocket){
             }
             if(type === 'connected-users-count'){
                 const { roomId } = receivedData;
-                rooms[roomId].forEach((client) => {
+                rooms[roomId].clients.forEach((client) => {
                     if(client.readyState === WebSocket.OPEN){
                         const data = {
                             type: 'connected-users-count',
-                            count: rooms[roomId].size
+                            count: rooms[roomId].clients.size
                         }
 
                         client.send(JSON.stringify(data), {binary: isBinary});
@@ -129,16 +137,16 @@ wss.on('connection', function connection(ws:WebSocket){
 
         // Iterate through all rooms and remove the client
         Object.keys(rooms).forEach((roomId) => {
-            if(rooms[roomId].has(ws)){
+            if(rooms[roomId].clients.has(ws)){
                 // Remove the WebSocket client from the room
-                rooms[roomId].delete(ws);
+                rooms[roomId].clients.delete(ws);
 
                 // Send the message to each client that user is disconnected
-                rooms[roomId].forEach((client) => {
+                rooms[roomId].clients.forEach((client) => {
                     if(client.readyState === WebSocket.OPEN){
                         const data = {
                             type: 'connected-users-count',
-                            count: rooms[roomId].size
+                            count: rooms[roomId].clients.size
                         }
 
                         client.send(JSON.stringify(data));
@@ -146,7 +154,7 @@ wss.on('connection', function connection(ws:WebSocket){
                 })
 
                 // If the room is now empty, delete the room
-                if(rooms[roomId].size === 0){
+                if(rooms[roomId].clients.size === 0){
                     delete rooms[roomId];
                     console.log(`Room ${roomId} is now empty and deleted.`);
                 }
