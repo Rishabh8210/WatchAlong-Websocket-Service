@@ -86,6 +86,17 @@ wss.on('connection', function connection(ws:WebSocket){
                 })
             }
 
+            if(type === 'player-controler'){
+                // Broadcast the message to all connected clients in the room
+                rooms[roomId].forEach((client) => {
+                    if(client.readyState === WebSocket.OPEN){
+                        
+                        // Send the message to each client (binary or text based on the message type)
+                        client.send(data, {binary: isBinary});
+                    }
+                })
+            }
+
             if(type === 'new-message'){
                 rooms[roomId].forEach((client) => {
                     if(client.readyState === WebSocket.OPEN){

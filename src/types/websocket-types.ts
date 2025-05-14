@@ -28,4 +28,10 @@ export interface ConnectedUsers {
     roomId: string
 }
 
-export type WebSocketMessage = JoinRoomMessage | MessageToRoom | RoomMessages | ConnectedUsers | null
+export interface PlayerControlers{
+    type: 'player-controler', 
+    roomId: string,
+    message: MessageData
+}
+
+export type WebSocketMessage = JoinRoomMessage | MessageToRoom | RoomMessages | ConnectedUsers | PlayerControlers |null
